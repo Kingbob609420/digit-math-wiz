@@ -1,9 +1,24 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Camera, CheckCircle, Zap, BookOpen, Menu } from "lucide-react";
 import heroImage from "@/assets/hero-math.jpg";
+import { CameraUpload } from "@/components/CameraUpload";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [capturedImages, setCapturedImages] = useState<string[]>([]);
+  const { toast } = useToast();
+
+  const handleImageCapture = (imageUrl: string) => {
+    setCapturedImages(prev => [...prev, imageUrl]);
+    toast({
+      title: "Image Captured!",
+      description: "Your math problem has been captured. AI analysis coming soon!",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-primary text-foreground">
       {/* Navigation */}
@@ -61,7 +76,11 @@ const Index = () => {
             
             {/* CTA Button */}
             <div className="pt-8">
-              <Button size="lg" className="text-lg px-12 py-4 bg-primary hover:bg-primary/90 shadow-glow">
+              <Button 
+                size="lg" 
+                className="text-lg px-12 py-4 bg-primary hover:bg-primary/90 shadow-glow"
+                onClick={() => setIsCameraOpen(true)}
+              >
                 <Camera className="mr-3 h-6 w-6" />
                 Start Scanning Now
               </Button>
@@ -169,7 +188,11 @@ const Index = () => {
               to make math learning more efficient and effective.
             </p>
             <div className="pt-4">
-              <Button size="lg" className="text-lg px-12 py-4 bg-primary hover:bg-primary/90 shadow-glow">
+              <Button 
+                size="lg" 
+                className="text-lg px-12 py-4 bg-primary hover:bg-primary/90 shadow-glow"
+                onClick={() => setIsCameraOpen(true)}
+              >
                 <Camera className="mr-3 h-6 w-6" />
                 Get Started Now
               </Button>
@@ -177,6 +200,12 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <CameraUpload
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onImageCapture={handleImageCapture}
+      />
     </div>
   );
 };
