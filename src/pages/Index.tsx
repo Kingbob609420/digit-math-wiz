@@ -15,7 +15,7 @@ const Index = () => {
     setCapturedImages(prev => [...prev, imageUrl]);
     toast({
       title: "Image Captured!",
-      description: "Your math problem has been captured. AI analysis coming soon!",
+      description: "Your math problem is ready for local AI analysis - no API keys needed!",
     });
   };
 
@@ -69,8 +69,8 @@ const Index = () => {
               </h1>
               
               <p className="text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Scan math problems instantly and get AI-powered corrections with detailed explanations. 
-                Perfect for students, teachers, and parents seeking efficient math assistance.
+                Scan math problems instantly and get AI-powered corrections with detailed explanations using local Hugging Face models. 
+                Privacy-first, no API keys required - everything runs in your browser!
               </p>
             </div>
             

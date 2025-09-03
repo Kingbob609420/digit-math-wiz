@@ -4,9 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Camera, Upload, X, RotateCcw, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ApiKeySetup } from "./ApiKeySetup";
 import { MathResults } from "./MathResults";
-import { OpenAIService } from "@/services/OpenAIService";
+import { HuggingFaceService } from "@/services/HuggingFaceService";
 
 interface CameraUploadProps {
   isOpen: boolean;
@@ -32,7 +31,6 @@ export const CameraUpload = ({ isOpen, onClose, onImageCapture }: CameraUploadPr
   const [isCamera, setIsCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [showApiKeySetup, setShowApiKeySetup] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<MathAnalysisResult | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -97,29 +95,21 @@ export const CameraUpload = ({ isOpen, onClose, onImageCapture }: CameraUploadPr
     }
   }, []);
 
-  const handleUseImage = useCallback(() => {
-    if (capturedImage) {
-      onImageCapture(capturedImage);
-      // Check if API key exists, if not show setup
-      const apiKey = OpenAIService.getApiKey();
-      if (!apiKey) {
-        setShowApiKeySetup(true);
-      } else {
-        analyzeMathProblem();
-      }
-    }
-  }, [capturedImage, onImageCapture]);
-
   const analyzeMathProblem = useCallback(async () => {
     if (!capturedImage) return;
 
     setIsAnalyzing(true);
     try {
-      const result = await OpenAIService.analyzeMathProblem(capturedImage);
+      toast({
+        title: "Analyzing with AI...",
+        description: "Using local Hugging Face models for privacy-first analysis",
+      });
+      
+      const result = await HuggingFaceService.analyzeMathProblem(capturedImage);
       setAnalysisResult(result);
       toast({
         title: "Analysis Complete!",
-        description: `Grade: ${result.grade} (${result.percentage}%)`,
+        description: `Grade: ${result.grade} (${result.percentage}%) - Analyzed locally with AI`,
       });
     } catch (error) {
       console.error('Analysis error:', error);
@@ -133,9 +123,13 @@ export const CameraUpload = ({ isOpen, onClose, onImageCapture }: CameraUploadPr
     }
   }, [capturedImage, toast]);
 
-  const handleApiKeySet = useCallback((apiKey: string) => {
-    analyzeMathProblem();
-  }, [analyzeMathProblem]);
+  const handleUseImage = useCallback(() => {
+    if (capturedImage) {
+      onImageCapture(capturedImage);
+      analyzeMathProblem();
+    }
+  }, [capturedImage, onImageCapture, analyzeMathProblem]);
+
 
   const handleClose = useCallback(() => {
     stopCamera();
@@ -230,12 +224,12 @@ export const CameraUpload = ({ isOpen, onClose, onImageCapture }: CameraUploadPr
                         {isAnalyzing ? (
                           <>
                             <Brain className="h-4 w-4 mr-2 animate-pulse" />
-                            Analyzing...
+                            Analyzing with AI...
                           </>
                         ) : (
                           <>
                             <Brain className="h-4 w-4 mr-2" />
-                            Analyze & Grade
+                            Analyze with Local AI
                           </>
                         )}
                       </Button>
@@ -257,12 +251,6 @@ export const CameraUpload = ({ isOpen, onClose, onImageCapture }: CameraUploadPr
           </div>
         </DialogContent>
       </Dialog>
-
-      <ApiKeySetup
-        isOpen={showApiKeySetup}
-        onClose={() => setShowApiKeySetup(false)}
-        onApiKeySet={handleApiKeySet}
-      />
     </>
   );
 };
